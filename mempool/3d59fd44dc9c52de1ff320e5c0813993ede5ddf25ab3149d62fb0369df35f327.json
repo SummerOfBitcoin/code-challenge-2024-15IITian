@@ -1,8 +1,7 @@
 {
     "version": 1,
     "locktime": 0,
-    "vin": [
-        {
+    "vin": [{
             "txid": "38b9d961cb3dde65ea66dbe285767fc8ca5be7815c3a6ce1115899741593d616",
             "vout": 20,
             "prevout": {
@@ -137,8 +136,7 @@
             "inner_redeemscript_asm": "OP_PUSHNUM_2 OP_PUSHBYTES_33 03b3c6fc6db162c045b9218765f91f43af4ffdfbdb9d8f9bdb94081be362b07e84 OP_PUSHBYTES_33 02192cc41066e52fa7e0ac32a6cfbc015f2ea55e50cfae92a56e5f76344d04f4e4 OP_PUSHBYTES_33 03fc37f6289923f49e5a3a9789b035b2dead4006647ec462b3b8d8d1bfaca9887c OP_PUSHNUM_3 OP_CHECKMULTISIG"
         }
     ],
-    "vout": [
-        {
+    "vout": [{
             "scriptpubkey": "a914a48b8788e9dad1d9fa97858a4eec895603ed40b987",
             "scriptpubkey_asm": "OP_HASH160 OP_PUSHBYTES_20 a48b8788e9dad1d9fa97858a4eec895603ed40b9 OP_EQUAL",
             "scriptpubkey_type": "p2sh",

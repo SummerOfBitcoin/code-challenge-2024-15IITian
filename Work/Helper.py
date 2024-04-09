@@ -9,8 +9,9 @@ import json
 def list_all_tx():
     # List containing all transaction files
     all_files= []
+
     # Specify the folder containing the JSON files
-    folder_path = "./mempool"
+    folder_path = "../../mempool"
 
     # List all files in the folder
     files = os.listdir(folder_path)
@@ -27,7 +28,20 @@ def list_all_tx():
         with open(file_path, 'r') as f:
             data = json.load(f)
         all_files.append(data)
-    return all_files        
+    return all_files   
+
+
+
+
+def little_endian_to_int(b):
+    '''little_endian_to_int takes byte sequence as a little-endian number.
+    Returns an integer'''
+    return int.from_bytes(b, 'little')
+
+def int_to_little_endian(n, length):
+    '''endian_to_little_endian takes an integer and returns the little-endian
+    byte sequence of length'''
+    return n.to_bytes(length, 'little')
     
    
   
