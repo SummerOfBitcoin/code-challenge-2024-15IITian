@@ -1,8 +1,9 @@
 ## This file contains all the code which are unrelated to Bitcoin 
 ## But they are used as helping tools 
 
-import os
-import json
+
+import json,hashlib,os
+
 
 ## This function will return  all the the transactions
 ## JSON files in mempool folder in a list 
@@ -42,6 +43,53 @@ def int_to_little_endian(n, length):
     '''endian_to_little_endian takes an integer and returns the little-endian
     byte sequence of length'''
     return n.to_bytes(length, 'little')
+
+def encode_num(num):
+    if num == 0:
+        return b''
+    abs_num = abs(num)
+    negative = num < 0
+    result = bytearray()
+    while abs_num:
+        result.append(abs_num & 0xff)
+        abs_num >>= 8
+    # if the top bit is set,
+    # for negative numbers we ensure that the top bit is set
+    # for positive numbers we ensure that the top bit is not set
+    if result[-1] & 0x80:
+        if negative:
+            result.append(0x80)
+        else:
+            result.append(0)
+    elif negative:
+        result[-1] |= 0x80
+    return bytes(result)
+
+
+def decode_num(element):
+    if element == b'':
+        return 0
+    # reverse for big endian
+    big_endian = element[::-1]
+    # top bit being 1 means it's negative
+    if big_endian[0] & 0x80:
+        negative = True
+        result = big_endian[0] & 0x7f
+    else:
+        negative = False
+        result = big_endian[0]
+    for c in big_endian[1:]:
+        result <<= 8
+        result += c
+    if negative:
+        return -result
+    else:
+        return result
+
+def HASH160(s):
+    #sha256 followed by ripemd160
+    return hashlib.new('ripemd160', hashlib.sha256(s).digest()).digest()
+
     
    
   

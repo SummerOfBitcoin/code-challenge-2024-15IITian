@@ -3,9 +3,9 @@ import sys
 import os
 
 
-# module_path = os.path.abspath(os.path.join('../'))
-# if module_path not in sys.path:
-#     sys.path.append(module_path)
+module_path = os.path.abspath(os.path.join('../'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
 from Work.Opcodes import *
 from Work.Helper import little_endian_to_int
 
@@ -13,21 +13,21 @@ from Work.Helper import little_endian_to_int
 # "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20","<20_BYTE_HASH>", "OP_EQUAL"],
 #             "script_sig":[]
 script_types= {
-    "legacy":{
+    
         "p2pkh":{
             "scriptpubkey":["OP_DUP","OP_HASH160","OP_PUSHBYTES_20","<20_BYTE_HASH>","OP_EQUALVERIFY","OP_CHECKSIG"],
             "script_sig":["<Signature>","<pubkey>"]
         },
         "p2sh":{
-            "normal-p2sh"
+             "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
+             "script_sig":"" ## can be anything depending on redeem script but will contain redeem script          
             
         },
         "bare-multisig":{
             "scriptpubkey":["OP_PUSHNUM_M","N(PushBytes + PubKeys)", "OP_PUSHNUM_N", "OP_CHECKMULTISIG"],
             "script_sig":[]
-        }        
-    },
-    "segwit":{
+        },   
+
         "v0_p2wpkh":{
             "scriptpubkey":["OP_0", "OP_PUSHBYTES_20","<20_BYTE_HASH>"],
             "script_sig":""
@@ -40,8 +40,18 @@ script_types= {
             "scriptpubkey":["OP_PUSHNUM_1", "OP_PUSHBYTES_32", "<32_BYTE_HASH>"],
             "script_sig":""
         },
-    },
-    "op_return":"OP_RETURN"
+        "v0_p2sh_p2wpkh":{
+            "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
+            "script_sig":["OP_PUSHBYTES_22","<20 BYTE REDEEM_SCRIPT HASH>"],
+            "witness":[]
+        },
+        "v0_p2sh_p2wsh":{
+            "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
+            "script_sig":["OP_PUSHBYTES_34","<20 BYTE REDEEM_SCRIPT HASH>"],
+            "witness":[]
+        }
+   
+    #    "op_return":"OP_RETURN"
 }
 class Script:
     def __init__(self,cmds=None):
@@ -54,17 +64,7 @@ class Script:
     def __repr__(self):
         result= []
         errors=[]
-        # for cmd in self.cmds:
-        #     if type(cmd) == int:
-        #         if OP_CODE_NAMES.get(cmd):
-        #             semi_parse.append("\t".join (OP_CODE_NAMES.get(cmd))) 
-        #         else:
-        #             errors.append("\t".join (cmd))
-
-        #     else:
-        #         semi_parse.append("\t".join (cmd)) 
-        # return ' '.join(semi_parse)
-
+        
         for cmd in self.cmds:
             if type(cmd) == int:
                 if OP_CODE_NAMES.get(cmd):
@@ -132,21 +132,79 @@ class Script:
         
         return cls(cmds)
     
+    
 
-#     # "OP_DUP OP_HASH160 OP_PUSHBYTES_20 6085312a9c500ff9cc35b571b0a1e5efb7fb9f16 OP_EQUALVERIFY OP_CHECKSIG",
-#     # @classmethod
-#     # def is_p2pkh_scriptpubkey(script_pub_key_hex):
-#     #     cmds= Script.parse(script_pub_key_hex)
-#     #     for cmd in cmds
+    
+    # function to check whether a given scriptpubkey matches with the type mentioned in scripttype
+    @classmethod
+    def is_scriptpubkey_match_scripttype(cls,script_pubkey_asm,script_type):
+        cmd= script_pubkey_asm.split(" ")
+        if script_type == 'op_return':
+            return cmd[0] == "OP_RETURN"
+        elif script_type == 'p2pkh':
+            return len(cmd)==6 and [cmd[0],cmd[1],cmd[2]]== ['OP_DUP','OP_HASH160','OP_PUSHBYTES_20']  and len(bytes.fromhex(cmd[3])) == 20 \
+                  and [cmd[4],cmd[5]] == ['OP_EQUALVERIFY','OP_CHECKSIG']
+        
+        elif script_type in ['p2sh','v0_p2sh_p2wpkh','v0_p2sh_p2wsh']:
+            return len(cmd)==4 and cmd[0]=='OP_HASH160' \
+            and cmd[1]=='OP_PUSHBYTES_20' \
+            and len(bytes.fromhex(cmd[2])) == 20 and cmd[3]=='OP_EQUAL'
+        
+        elif script_type == 'v1_p2tr':
+            return len(cmd)== 3 and [cmd[0], cmd[1]]==['OP_PUSHNUM_1','OP_PUSHBYTES_32'] \
+            and len(bytes.fromhex(cmd[2])) == 32
+        
+        elif script_type =='v0_p2wpkh':
+            return len(cmd)== 3 and [cmd[0], cmd[1]]==['OP_0','OP_PUSHBYTES_20'] \
+            and len(bytes.fromhex(cmd[2])) == 20
+        
+        elif script_type == 'v0_p2wsh':
+             return len(cmd)== 3 and [cmd[0], cmd[1]]==['OP_0','OP_PUSHBYTES_32'] \
+            and len(bytes.fromhex(cmd[2])) == 32
+        
+        else: # bare-multisig
+            return is_bare_multisig_script_type(cmd)
 
 
 
-# # a= "0014392f28fde2dcf2cccbd05885e22d7b823fb2b5d9"
-# # b=Script.parse(a)
-# # print(b)
+        
 
 
-# types of script used in here-> 
+def is_bare_multisig_script_type(cmd):         
+       #OP_PUSHNUM_1  
+        counter=1
+        if cmd[0][:-2] == 'OP_PUSHNUM' and cmd[-2][:-2]== 'OP_PUSHNUM': 
+           threshold= int(cmd[0][-1])
+           total= int(cmd[-2][-1])
+           if total*2 + 3 != len(cmd):
+               return False
+           if total>= threshold:
+               for _ in range(total):
+                   if  not (cmd[counter]=='OP_PUSHBYTES_33' and len(bytes.fromhex(cmd[counter+1])) ==33):
+                       return False
+                   counter+=2
+                   
+               if (cmd[-1] =='OP_CHECKMULTISIG'):   
+                 return True    
+               else:
+                 return False                 
+                   
+
+           else:
+               return False    
+           
+        else:
+             return False
+    
+
+
+
+    
+
+            
+    
+
+
 # {'bare-multisig',
 #  'op_return',
 #  'p2pkh',
