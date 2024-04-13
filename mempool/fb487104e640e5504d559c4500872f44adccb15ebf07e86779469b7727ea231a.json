@@ -8,7 +8,7 @@
             "prevout": {
                 "scriptpubkey": "a914708a19f9ba49066e7a3f45f914babe6bcd8ef2e287",
                 "scriptpubkey_asm": "OP_HASH160 OP_PUSHBYTES_20 708a19f9ba49066e7a3f45f914babe6bcd8ef2e2 OP_EQUAL",
-                "scriptpubkey_type": "p2sh",
+                "scriptpubkey_type": "v0_p2sh_p2wpkh",
                 "scriptpubkey_address": "3Bx53VCAMyT6Jf7zpkB9ZPt2DLUUZKUXzV",
                 "value": 1399496865
             },
