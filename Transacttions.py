@@ -26,7 +26,7 @@ all_files= list_all_tx()
     
 class Tx:
 
-    def __init__(self, version, tx_ins, tx_outs, locktime, testnet=False):
+    def __init__(self,version, tx_ins, tx_outs, locktime):
         self.version = version
         self.tx_ins = tx_ins  
         self.tx_outs = tx_outs
@@ -54,6 +54,8 @@ class Tx:
       for file in new_files:    
           file["is_segwit"]= False
           for input in file["vin"]:
+               # add sequence category field 
+               input["sequence_result"] = categorize_sequence(input["sequence"])
                if input["prevout"]["scriptpubkey_type"] in ["v1_p2tr","v0_p2wpkh","v0_p2sh_p2wpkh","v0_p2sh_p2wsh","v0_p2wsh"]:
                    file["is_segwit"]= True
    
@@ -61,6 +63,9 @@ class Tx:
           file["fee"] = Tx.fee_for_each_tx(file) 
           file["fee_rate"]=  file["fee"] / weights
           file["weights"] =weights
+          
+
+
   
       return new_files
     
@@ -388,7 +393,7 @@ class Tx:
                 witness=None
 
             # now we get the z & witness for each possible script type
-        combined = tx_in["scriptsig_asm"] + script_pubkey
+        combined = tx_in["scriptsig_asm"].split(" ") + script_pubkey.split(" ")
             
 
         return Script.evaluate(combined,z,witness)     
@@ -526,6 +531,32 @@ class Tx:
         witness_commitment = hash256(witness_root_hash+ bytes.fromhex(witness_reserved_value))
 
         return witness_commitment.hex()
+    
+
+    @classmethod
+    def get_unlocked_tx(cls,tx_files):
+        # here we use tx_files must contain the additional fields which are included using modify tx fn
+        tx_locked = []
+        tx_unlocked=[]
+        zeroes= 0
+        for file in tx_files:
+            unlock_flag= 1
+            for input in file["vin"]:
+                lock_enabled= input["sequence_result"]["relative_locktime"]
+                if lock_enabled!= False:
+                    if lock_enabled["value"] > 0:
+                        tx_locked.append(file)
+                        unlock_flag-=1
+                        break
+                    else:
+                        zeroes+=1
+
+
+            if unlock_flag:
+                tx_unlocked.append(file)    
+
+        return (tx_unlocked,tx_locked,zeroes)           
+            
 
 
 class Transaction_Input:
@@ -592,6 +623,7 @@ class Transaction_Output:
         result+= bytes.fromhex(scriptpubkey)
 
         return result
+    
 
     
 

@@ -32,6 +32,14 @@ def list_all_tx():
     return all_files   
 
 
+def hash256(s):
+    '''two rounds of sha256'''
+    return hashlib.sha256(hashlib.sha256(s).digest()).digest()
+
+
+def sha256(s):
+    return hashlib.sha256(s).digest()
+
 
 
 def little_endian_to_int(b):
@@ -85,6 +93,78 @@ def decode_num(element):
         return -result
     else:
         return result
+    
+def read_varint(s):
+    '''read_varint reads a variable integer from a stream'''
+    i = s.read(1)[0]
+    if i == 0xfd:
+        # 0xfd means the next two bytes are the number
+        return little_endian_to_int(s.read(2))
+    elif i == 0xfe:
+        # 0xfe means the next four bytes are the number
+        return little_endian_to_int(s.read(4))
+    elif i == 0xff:
+        # 0xff means the next eight bytes are the number
+        return little_endian_to_int(s.read(8))
+    else:
+        # anything else is just the integer
+        return i
+
+
+def encode_varint(i):
+    '''encodes an integer as a varint'''
+    if i < 0xfd:
+        return bytes([i])
+    elif i < 0x10000:
+        return b'\xfd' + int_to_little_endian(i, 2)
+    elif i < 0x100000000:
+        return b'\xfe' + int_to_little_endian(i, 4)
+    elif i < 0x10000000000000000:
+        return b'\xff' + int_to_little_endian(i, 8)
+    else:
+        raise ValueError('integer too large: {}'.format(i))
+
+
+def merkle_parent(hash1, hash2):
+    '''Takes the binary hashes and calculates the hash256'''
+    # return the hash256 of hash1 + hash2
+    return hash256(hash1 + hash2)
+
+def merkle_parent_level(hashes):
+    '''Takes a list of binary hashes and returns a list that's half
+    the length'''
+    # if the list has exactly 1 element raise an error
+    if len(hashes) == 1:
+        raise RuntimeError('Cannot take a parent level with only 1 item')
+    # if the list has an odd number of elements, duplicate the last one
+    # and put it at the end so it has an even number of elements
+    if len(hashes) % 2 == 1:
+        hashes.append(hashes[-1])
+    # initialize next level
+    parent_level = []
+    # loop over every pair (use: for i in range(0, len(hashes), 2))
+    for i in range(0, len(hashes), 2):
+        # get the merkle parent of the hashes at index i and i+1
+        parent = merkle_parent(hashes[i], hashes[i + 1])
+        # append parent to parent level
+        parent_level.append(parent)
+    # return parent level
+    return parent_level
+
+
+def merkle_root(hashes):
+    '''Takes a list of binary hashes and returns the merkle root
+    '''
+    # current level starts as hashes
+    current_level = hashes
+    # loop until there's exactly 1 element
+    while len(current_level) > 1:
+        # current level becomes the merkle parent level
+        current_level = merkle_parent_level(current_level)
+    # return the 1st item of the current level
+    return current_level[0]
+
+
 
 def HASH160(s):
     #sha256 followed by ripemd160

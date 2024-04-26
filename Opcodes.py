@@ -3,8 +3,12 @@ module_path = os.path.abspath(os.path.join('../'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
+# from Work.Helper import *
 from Helper import *
 from logging import getLogger
+from ecc import *
+
+
 LOGGER = getLogger(__name__)
 
 
@@ -271,11 +275,157 @@ OP_CODE_NAMES = {
 
 
 
-all_opcodes_used=['OP_PUSHBYTES_32', 'OP_PUSHBYTES_34', 'OP_PUSHBYTES_65', 'OP_PUSHBYTES_31',  'OP_PUSHBYTES_42', 'OP_PUSHBYTES_74', 'OP_PUSHBYTES_72', 'OP_PUSHBYTES_12', 'OP_PUSHBYTES_9', 'OP_PUSHBYTES_13', 'OP_PUSHBYTES_11', 'OP_PUSHDATA1', 'OP_PUSHBYTES_69', 'OP_PUSHBYTES_46', 'OP_PUSHBYTES_73', 'OP_PUSHBYTES_64', 'OP_PUSHBYTES_4', 'OP_PUSHBYTES_17', 'OP_PUSHBYTES_1', 'OP_PUSHDATA2',  'OP_PUSHBYTES_22', 'OP_PUSHBYTES_67',  'OP_PUSHBYTES_33', 'OP_PUSHBYTES_20',  'OP_PUSHBYTES_71', 'OP_PUSHBYTES_10', 'OP_PUSHBYTES_54', 
-                   'OP_PUSHBYTES_63', 'OP_PUSHBYTES_70', 'OP_PUSHBYTES_68',  'OP_PUSHBYTES_5']
+
+# this function will give the funciton object from the string 
+def get_function_by_name(func_name):
+    # Check if the function exists in the global namespace
+    if func_name in globals() and callable(globals()[func_name]):
+        return globals()[func_name]
+    else:
+        return None
+
+
+all_opcodes_used : {  'OP_ELSE',   'OP_ENDIF'}
+
 
 
 ## definitions of all functions used -> 
+
+def OP_CLTV(stack, locktime, sequence):
+    if sequence == 0xffffffff:
+        return False
+    if len(stack) < 1:
+        return False
+    element = decode_num(stack[-1])
+    if element < 0:
+        return False
+    if element < 500000000 and locktime > 500000000:
+        return False
+    if locktime < element:
+        return False
+    return True
+
+
+
+def OP_CSV(stack, version, sequence):
+    if sequence & (1 << 31) == (1 << 31):
+        return False
+    if len(stack) < 1:
+        return False
+    element = decode_num(stack[-1])
+    if element < 0:
+        return False
+    if element & (1 << 31) == (1 << 31):
+        if version < 2:
+            return False
+        elif sequence & (1 << 31) == (1 << 31):
+            return False
+        elif element & (1 << 22) != sequence & (1 << 22):
+            return False
+        elif element & 0xffff > sequence & 0xffff:
+            return False
+    return True
+
+
+
+def OP_GREATERTHAN(stack):
+    if len(stack) < 2:
+        return False
+    element1 = decode_num(stack.pop())
+    element2 = decode_num(stack.pop())
+    if element2 > element1:
+        stack.append(encode_num(1))
+    else:
+        stack.append(encode_num(0))
+    return True
+
+def OP_SWAP(stack):
+    if len(stack) < 2:
+        return False
+    stack.append(stack.pop(-2))
+    return True
+
+def OP_OVER(stack):
+    if len(stack) < 2:
+        return False
+    stack.append(stack[-2])
+    return True
+
+def OP_IFDUP(stack):
+    if len(stack) < 1:
+        return False
+    if decode_num(stack[-1]) != 0:
+        stack.append(stack[-1])
+    return True
+
+def OP_SIZE(stack):
+    if len(stack) < 1:
+        return False
+    stack.append(encode_num(len(stack[-1])))
+    return True
+
+def OP_ROT(stack):
+    if len(stack) < 3:
+        return False
+    stack.append(stack.pop(-3))
+    return True
+
+
+def OP_NOTIF(stack, items):
+    if len(stack) < 1:
+        return False
+    # go through and re-make the items array based on the top stack element
+    true_items = []
+    false_items = []
+    current_array = true_items
+    found = False
+    num_endifs_needed = 1
+    while len(items) > 0:
+        item = items.pop(0)
+        if item in (99, 100):
+            # nested if, we have to go another endif
+            num_endifs_needed += 1
+            current_array.append(item)
+        elif num_endifs_needed == 1 and item == 103:
+            current_array = false_items
+        elif item == 104:
+            if num_endifs_needed == 1:
+                found = True
+                break
+            else:
+                num_endifs_needed -= 1
+                current_array.append(item)
+        else:
+            current_array.append(item)
+    if not found:
+        return False
+    element = stack.pop()
+    if decode_num(element) == 0:
+        items[:0] = true_items
+    else:
+        items[:0] = false_items
+    return True
+
+
+
+def OP_SHA256(stack):
+    if len(stack) < 1:
+        return False
+    element = stack.pop()
+    stack.append(hashlib.sha256(element).digest())
+    return True
+
+def OP_DROP(stack):
+    if len(stack) < 1:
+        return False
+    stack.pop()
+    return True
+
+def OP_DEPTH(stack):
+    stack.append(encode_num(len(stack)))
+    return True
+
+
 
 def OP_0(stack):
     stack.append(encode_num(0))
@@ -289,7 +439,17 @@ def OP_PUSHNUM(stack,pushnum_cmd):
     stack.append(encode_num(no))
     return True
 
-    
+def OP_PUSHDATA1(stack):
+    return True
+
+def OP_PUSHDATA2(stack):
+    return True
+
+
+def OP_PUSHBYTES(stack):
+    return True
+
+
 
 def OP_DUP(stack):
     if len(stack) < 1:
@@ -299,6 +459,8 @@ def OP_DUP(stack):
 
 
 def OP_CHECKSIG(stack, z):
+
+    
     # check that there are at least 2 elements on the stack
     if len(stack) < 2:
         return False
@@ -309,14 +471,14 @@ def OP_CHECKSIG(stack, z):
     der_signature = stack.pop()[:-1]
     # parse the serialized pubkey and signature into objects
     try:
-        point = S256Point.parse(sec_pubkey)
-        sig = Signature.parse(der_signature)
+        point= S256Point.parse(bytes.fromhex(sec_pubkey))
+        sig= Signature.parse(bytes.fromhex(der_signature[:-2]))
     except (ValueError, SyntaxError) as e:
         LOGGER.info(e)
         return False
     # verify the signature using S256Point.verify()
     # push an encoded 1 or 0 depending on whether the signature verified
-    if point.verify(z, sig):
+    if point.verify(z,sig):
         stack.append(encode_num(1))
     else:
         stack.append(encode_num(0))
@@ -373,9 +535,12 @@ def OP_HASH160(stack):
     # pop off the top element from the stack
     element = stack.pop()
     # push a hash160 of the popped off element to the stack
-    h160 = HASH160(element)
+    h160 = HASH160(bytes.fromhex(element))
     stack.append(h160)
     return True
+
+def OP_CHECKSIGVERIFY(stack, z):
+    return OP_CHECKSIG(stack, z) and OP_VERIFY(stack)
 
 
 def OP_EQUALVERIFY(stack):
@@ -405,3 +570,59 @@ def OP_VERIFY(stack):
 
 def OP_RETURN(stack):
     return False
+
+def OP_IF(stack, items):
+    if len(stack) < 1:
+        return False
+    # go through and re-make the items array based on the top stack element
+    true_items = []
+    false_items = []
+    current_array = true_items
+    found = False
+    num_endifs_needed = 1
+    while len(items) > 0:
+        item = items.pop(0)
+        if item in (99, 100):
+            # nested if, we have to go another endif
+            num_endifs_needed += 1
+            current_array.append(item)
+        elif num_endifs_needed == 1 and item == 103:
+            current_array = false_items
+        elif item == 104:
+            if num_endifs_needed == 1:
+                found = True
+                break
+            else:
+                num_endifs_needed -= 1
+                current_array.append(item)
+        else:
+            current_array.append(item)
+    if not found:
+        return False
+    element = stack.pop()
+    if decode_num(element) == 0:
+        items[:0] = false_items
+    else:
+        items[:0] = true_items
+    return True
+
+
+
+
+sec_pubkey= "02c371793f2e19d1652408efef67704a2e9953a43a9dd54360d56fc93277a5667d"
+der_signature= "3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801"
+
+# publickey= secp256k1.PublicKey(None,True)
+# ecdsa= secp256k1.ECDSA()
+# print(len(der_signature))
+# print(int.from_bytes(bytes.fromhex("20"),"big"))
+# point= publickey.deserialize(bytes.fromhex(sec_pubkey))
+# sig= ecdsa.ecdsa_deserialize(bytes.fromhex(der_signature))
+
+# print( S256Point.parse(bytes.fromhex(sec_pubkey)))
+# print(Signature.parse(bytes.fromhex(der_signature[:-2])))
+# print(publickey.ecdsa_verify(z,sig))
+# print(b)
+
+# print(publickey.public_key)
+# print("b  {}".format(b))
