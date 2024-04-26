@@ -5,6 +5,9 @@
 import json,hashlib,os
 
 
+from Crypto.Hash import RIPEMD160
+
+
 ## This function will return  all the the transactions
 ## JSON files in mempool folder in a list 
 def list_all_tx():
@@ -168,8 +171,20 @@ def merkle_root(hashes):
 
 def HASH160(s):
     #sha256 followed by ripemd160
-    return hashlib.new('ripemd160', hashlib.sha256(s).digest()).digest()
+    # return hashlib.new('ripemd160', hashlib.sha256(s).digest()).digest()
+    ripemd160 = RIPEMD160.new()
+    ripemd160.update(s)
+    return ripemd160.hexdigest()
+
+
+a= 5
+print(HASH160(a.to_bytes(4,"big")))
 
     
    
   
+
+
+# h = RIPEMD160.new()
+# h.update(b'Hello')
+# print h.hexdigest()
