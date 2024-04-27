@@ -116,6 +116,8 @@ class Block:
       # get the data related to tx mined in our block
       (tx_count,tx_included,fees_collected,weight_stored)=Block.get_mined_tx_data(tx_files)
 
+    #   print("fee_included:{}",format(fees_collected))
+    #   print("weight stored: {}".format(weight_stored))
       # create an instance of a block
       block= Block(version,prev_block_in_bytes,merkle_root_hash,timestamp,bits_in_bytes,nonce,tx_hashes_list)
       # get the serliased block header
@@ -152,7 +154,7 @@ class Block:
       print(valid_block.serialize_blockheader())      
       # print("{} {} {} {} {} {} ".format(valid_block.version,(valid_block.prev_block).hex(),(valid_block.merkle_root).hex(),valid_block.timestamp,(valid_block.bits).hex(),valid_block.nonce))    
 
-      print("block hash: {}".format(valid_block.hash()))
+    #   print("block hash: {}".format(valid_block.hash()))
     #   serliased coinbase transaction
       print(serliased_coinbase_tx)
 
