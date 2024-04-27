@@ -11,9 +11,7 @@ if module_path not in sys.path:
 from Opcodes import *
 from Helper import *
 
-    # "OP_DUP OP_HASH160 OP_PUSHBYTES_20 6085312a9c500ff9cc35b571b0a1e5efb7fb9f16 OP_EQUALVERIFY OP_CHECKSIG",
-# "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20","<20_BYTE_HASH>", "OP_EQUAL"],
-#             "script_sig":[]
+
 script_types= {
     
         "p2pkh":{
@@ -53,7 +51,6 @@ script_types= {
             "witness":[]
         }
    
-    #    "op_return":"OP_RETURN"
 }
 class Script:
     def __init__(self,cmds=None):
@@ -273,23 +270,6 @@ class Script:
             return False
         return True
 
-
-
-
-     
-                         
-                     
-                       
-                            
-                       
-                  
-
-
-
-
-
-
-
     
     # function to check whether a given scriptpubkey matches with the type mentioned in scripttype
     @classmethod
@@ -376,45 +356,5 @@ def is_p2wsh_script_pubkey(script_pubkey_asm):
 def p2pkh_script(h160):
     '''Takes a hash160 and returns the p2pkh ScriptPubKey in serialised hex format'''
     return  ("76a914"+  h160+"88ac")
-    
 
-
-
-            
-b=  "OP_HASH160 OP_PUSHBYTES_20 dfe791507cb5a44c9a527982f5a69ade6c5421c9 OP_EQUAL"
-a="OP_0 OP_PUSHBYTES_72 3045022100e1804c80eb6aecbb423d1a1223bedc3de5300ce32825a5fe979643727ebb56b00220351385c13fc79e7f8405e433bdd18c8630a446db06b693362f288a7615f7075701 OP_PUSHBYTES_72 3045022100f4dda558ecfae6d2acb68a07f51d8314e6819afebc79fba2674f79320e60d3d002204e497fa8d610514e652939f07876589fa1f2ea36d4ae2570079251a46d4d2f6001 OP_PUSHBYTES_71 522102fa3e97f867f6dd61c8f3870174a62212c568bbfa1d55fd57b8d355343d35a65c2103031d20b72222b1f6fe8217783c0adf898358afc24dee408e518e4af0dc899e7052ae"
-# c=  Script.add(a,b)   
-# c= c[::-1]
-# print(c)
-# print(c.pop(0))
-# print(c.pop())
-# print(c[:])
-
-d= "001429862d65368280039b5454830c4bb728e3e87412"
-e= "76a9141ef7874d338d24ecf6577e6eadeeee6cd579c67188ac"
-pkh="29862d65368280039b5454830c4bb728e3e87412"
-script= p2pkh_script(pkh)
-# print(script)
-
-# print(Script.parse(script))
-
-# print(d)
-# print(type(d))
-# print(d[1])
-# print(d.split(" "))
-# print(d)
-# b= b.split(" ")
-# d.extend(b)
-# print(d)
-
-target= 100
-# print(target.to_bytes(32, 'big'))
-
-# {'bare-multisig',
-#  'op_return',
-#  'p2pkh',
-#  'p2sh',
-#  'v0_p2wpkh',
-#  'v0_p2wsh',
-#  'v1_p2tr'}
 

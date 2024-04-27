@@ -4,7 +4,7 @@
 
 import json,hashlib,os
 
-
+import Crypto
 from Crypto.Hash import RIPEMD160
 
 
@@ -177,8 +177,8 @@ def HASH160(s):
     return ripemd160.hexdigest()
 
 
-a= 5
-print(HASH160(a.to_bytes(4,"big")))
+# a= 5
+# print(HASH160(a.to_bytes(4,"big")))
 
     
    

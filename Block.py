@@ -1,7 +1,6 @@
 from io import BytesIO
 from unittest import TestCase
 import Transacttions
-# from Transacttions import *
 from Helper import *
 
 GENESIS_BLOCK = bytes.fromhex('0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c')
@@ -28,7 +27,7 @@ class Block:
 
 
     def serialize_blockheader(self):
-        '''Returns the 80 byte block header'''
+        '''Returns the 80 byte block header in hex'''
         # version - 4 bytes, little endian
         result = int_to_little_endian(self.version, 4)
         # prev_block - 32 bytes, little endian
@@ -108,7 +107,6 @@ class Block:
       #---------------------------------------------------------------------------------------------
 
       merkle_root_hash= merkle_root(tx_hashes_list)
-    #   print("merkle_root_hash: {}".format(merkle_root_hash.hex()))
       bits= "1f00ffff"
       bits_in_bytes=bytes.fromhex(bits) 
       target ="0000ffff00000000000000000000000000000000000000000000000000000000"
@@ -117,28 +115,23 @@ class Block:
       
       # get the data related to tx mined in our block
       (tx_count,tx_included,fees_collected,weight_stored)=Block.get_mined_tx_data(tx_files)
-    #   print("tx_count:{} , fees_collected :{} , weight_stored : {}".format(tx_count,fees_collected,weight_stored)) 
 
       # create an instance of a block
       block= Block(version,prev_block_in_bytes,merkle_root_hash,timestamp,bits_in_bytes,nonce,tx_hashes_list)
       # get the serliased block header
       serliased_block_header= block.serialize_blockheader()
 
-    #   print("block header:{}\n".format(serliased_block_header))
 
-    #   print("block_hash: {}".format(block.hash()))
       #-------------------------------------------------------------------------------------------
 
       # get valid block header/ pow
         
         
       valid_block= block.get_valid_nonce(target)
-    #   print(valid_block.serialize_blockheader())
       #______________________________________BLOCK_HEADER_________________________________________
  
        # get the serliased coinbase transaction 
       serliased_coinbase_tx= Transacttions.Tx.get_serliased_coinbase_tx(fees_collected,tx_files) 
-    #   print("coinbase transaction: {}".format(serliased_coinbase_tx))
 
       #______________________________________________________________________________________________
 
@@ -155,10 +148,11 @@ class Block:
 
        # now print the required block details in the output.txt
 
-       # block header
-      
-      print("{} {} {} {} {} {} ".format(valid_block.version,(valid_block.prev_block).hex(),(valid_block.merkle_root).hex(),valid_block.timestamp,(valid_block.bits).hex(),valid_block.nonce))    
+       # print the serliased block header
+      print(valid_block.serialize_blockheader())      
+      # print("{} {} {} {} {} {} ".format(valid_block.version,(valid_block.prev_block).hex(),(valid_block.merkle_root).hex(),valid_block.timestamp,(valid_block.bits).hex(),valid_block.nonce))    
 
+      print("block hash: {}".format(valid_block.hash()))
     #   serliased coinbase transaction
       print(serliased_coinbase_tx)
 

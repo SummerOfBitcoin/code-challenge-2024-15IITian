@@ -1,5 +1,3 @@
-# import Script
-# from Script import *
 from Helper import *
 from Script import *
 from Block import *
@@ -19,9 +17,6 @@ SIGHASH_ALL = 0x01
 
 # this list contains all tx files in mempool folder
 all_files= list_all_tx()
-
-
-
     
     
 class Tx:
@@ -83,10 +78,6 @@ class Tx:
         fee= input_amt- output_amt
         return fee        
 
-
-    ### fn to check whether a tx is using segwit or legacy 
-    # @classmethod
-    # def tx_is_segwit(file):
 
     ### serialising tx -> 
     @classmethod
@@ -177,15 +168,6 @@ class Tx:
         return tx_hash
 
 
-        
-
-        
-
-    
-
-
-
-
     @classmethod    
     def sig_hash_legacy(cls,file,input_index,redeem_script=None):
         file_copy =file.copy()
@@ -234,10 +216,6 @@ class Tx:
 
             return int.from_bytes(h256,"big") # doubt
     
-            
-        
-    
-
    
 
    # Finding Sig_hash for segwit transaction -> 
@@ -347,7 +325,7 @@ class Tx:
 
         # check whether the scrip_pubkey is p2sh
         if is_p2sh_script_pubkey(script_pubkey):
-# OP_HASH160 OP_PUSHBYTES_20 524c9cae5ea3fa7639754d46540a7f67bb5c2642 OP_EQUAL
+        # OP_HASH160 OP_PUSHBYTES_20 524c9cae5ea3fa7639754d46540a7f67bb5c2642 OP_EQUAL
             # then the last cmd would be Redeem Script of 20 bytes
             cmd= script_pubkey[-2]  # this will be serialised redeem script 
 
@@ -411,7 +389,7 @@ class Tx:
         # get the serialised tx
         serialise_tx= Tx.serialize(file)
         if not file["is_segwit"]:
-            return len(serialise_tx) * 4        # Tx.serialize give in bytes
+            return len(serialise_tx) * 4 # Tx.serialize give in bytes
         
         marker_size= 2
 
@@ -555,12 +533,12 @@ class Tx:
             if unlock_flag:
                 tx_unlocked.append(file)    
 
-        return (tx_unlocked,tx_locked,zeroes)           
+        return (tx_unlocked,tx_locked,zeroes)  
+             
             
 
 
 class Transaction_Input:
-
 
     def __init__(self,prev_txid,vout,script_sig="",sequence=0xffffffff,witness=None):
         self.prev_txid= prev_txid
@@ -571,13 +549,14 @@ class Transaction_Input:
             self.script_sig= script_sig
         self.sequence= sequence
        
-        self.witness= witness   # doing this for now 
+        self.witness= witness    
 
     def __repr__(self):
         return '{}:{}'.format(
             self.prev_tx.hex(),
             self.prev_index,
         ) 
+    
     
     # function to serialize a transaction input
     # Returns the byte serialization of the transaction input
@@ -632,8 +611,6 @@ class Transaction_Output:
 
 def categorize_sequence(sequence):   
     result= {"rbf":False,"relative_locktime":False}
-
-
     
     if sequence >= MIN_NO_RBF  or sequence == SEQUENCE_MAX:
          return result

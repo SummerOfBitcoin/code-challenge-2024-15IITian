@@ -3,7 +3,6 @@ module_path = os.path.abspath(os.path.join('../'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-# from Work.Helper import *
 from Helper import *
 from logging import getLogger
 from ecc import *
@@ -606,23 +605,3 @@ def OP_IF(stack, items):
         items[:0] = true_items
     return True
 
-
-
-
-sec_pubkey= "02c371793f2e19d1652408efef67704a2e9953a43a9dd54360d56fc93277a5667d"
-der_signature= "3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801"
-
-# publickey= secp256k1.PublicKey(None,True)
-# ecdsa= secp256k1.ECDSA()
-# print(len(der_signature))
-# print(int.from_bytes(bytes.fromhex("20"),"big"))
-# point= publickey.deserialize(bytes.fromhex(sec_pubkey))
-# sig= ecdsa.ecdsa_deserialize(bytes.fromhex(der_signature))
-
-# print( S256Point.parse(bytes.fromhex(sec_pubkey)))
-# print(Signature.parse(bytes.fromhex(der_signature[:-2])))
-# print(publickey.ecdsa_verify(z,sig))
-# print(b)
-
-# print(publickey.public_key)
-# print("b  {}".format(b))
