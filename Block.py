@@ -82,9 +82,6 @@ class Block:
         # sort the tx_included list
         tx_included =  sorted(tx_included, key=lambda x: x['fee_rate'],reverse=True)
            
-        print("tx_count: {}".format(tx_count))
-        print("fee_collected: {}".format(fee_collected))
-        print("weight_stored: {}".format(weight_stored))
 
 
         return (tx_count,tx_included,fee_collected,weight_stored)         

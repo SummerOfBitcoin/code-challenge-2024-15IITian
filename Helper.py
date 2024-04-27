@@ -13,7 +13,7 @@ def list_all_tx():
     all_files= []
 
     # Specify the folder containing the JSON files
-    folder_path = "./mempool_copy1"
+    folder_path = "./mempool"
 
     # List all files in the folder
     files = os.listdir(folder_path)
