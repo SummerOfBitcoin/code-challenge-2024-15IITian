@@ -12,46 +12,7 @@ from Opcodes import *
 from Helper import *
 
 
-script_types= {
-    
-        "p2pkh":{
-            "scriptpubkey":["OP_DUP","OP_HASH160","OP_PUSHBYTES_20","<20_BYTE_HASH>","OP_EQUALVERIFY","OP_CHECKSIG"],
-            "script_sig":["<Signature>","<pubkey>"]
-        },
-        "p2sh":{
-             "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
-             "script_sig":"" ## can be anything depending on redeem script but will contain redeem script          
-            
-        },
-        "bare-multisig":{
-            "scriptpubkey":["OP_PUSHNUM_M","N(PushBytes + PubKeys)", "OP_PUSHNUM_N", "OP_CHECKMULTISIG"],
-            "script_sig":[]
-        },   
 
-        "v0_p2wpkh":{
-            "scriptpubkey":["OP_0", "OP_PUSHBYTES_20","<20_BYTE_HASH>"],
-            "script_sig":""
-        },
-        "v0_p2wsh":{
-            "scriptpubkey":["OP_0" "OP_PUSHBYTES_32" "<32_Byte_Hash>"],
-            "script_sig":""
-        },
-        "v1_p2tr":{
-            "scriptpubkey":["OP_PUSHNUM_1", "OP_PUSHBYTES_32", "<32_BYTE_HASH>"],
-            "script_sig":""
-        },
-        "v0_p2sh_p2wpkh":{
-            "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
-            "script_sig":["OP_PUSHBYTES_22","<20 BYTE REDEEM_SCRIPT HASH>"],
-            "witness":[]
-        },
-        "v0_p2sh_p2wsh":{
-            "scriptpubkey":["OP_HASH160", "OP_PUSHBYTES_20", "<20_BYTE_HASH>", "OP_EQUAL"],
-            "script_sig":["OP_PUSHBYTES_34","<20 BYTE REDEEM_SCRIPT HASH>"],
-            "witness":[]
-        }
-   
-}
 class Script:
     def __init__(self,cmds=None):
         if cmds is None:

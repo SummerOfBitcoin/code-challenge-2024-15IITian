@@ -168,19 +168,11 @@ def merkle_root(hashes):
 
 
 def HASH160(s):
-    #sha256 followed by ripemd160
-    # return hashlib.new('ripemd160', hashlib.sha256(s).digest()).digest()
     return ripemd160(s)
 
 
-a= 5
-# print(HASH160(a.to_bytes(4,"big")))
+
 
     
    
   
-# print(ripemd160(a.to_bytes(4,"big")).hex())
-# h = RIPEMD160.new()
-# h.update(b'Hello')
-# print h.hexdigest()
-# print(HASH160(a.to_bytes(4,"big")))

@@ -82,7 +82,11 @@ class Block:
         # sort the tx_included list
         tx_included =  sorted(tx_included, key=lambda x: x['fee_rate'],reverse=True)
            
-                
+        print("tx_count: {}".format(tx_count))
+        print("fee_collected: {}".format(fee_collected))
+        print("weight_stored: {}".format(weight_stored))
+
+
         return (tx_count,tx_included,fee_collected,weight_stored)         
 
 
@@ -171,38 +175,13 @@ class Block:
       print(serliased)      
 
 
-
-
-
-
-
-    #   print("merkle root : \n {}".format(valid_block.merkle_root.hex()))
-    #   print(serliased)
-    #   serliased_in_bytes= bytes.fromhex(serliased)
-
-
-    #   desired_slice = serliased_in_bytes[36:68].hex()
-    #   print(desired_slice)
-    #   print(desired_slice == valid_block.merkle_root.hex())
-      # print("{} {} {} {} {} {} ".format(valid_block.version,(valid_block.prev_block).hex(),(valid_block.merkle_root).hex(),valid_block.timestamp,(valid_block.bits).hex(),valid_block.nonce))    
-
-    #   print("block hash: {}".format(valid_block.hash()))
-
-
-
-
-
-
     #   serliased coinbase transaction
       print(serliased_coinbase_tx)
 
     #   print all txids
       for tx_id in tx_ids_list:
-          print(tx_id)
-          
+          print(tx_id)       
 
-
-         
 
     
 
@@ -217,9 +196,6 @@ class Block:
         proof = little_endian_to_int(h256)
         # return whether this integer is less than the target
         target= int.from_bytes(bytes.fromhex(target),"big")
-
-    
-        # print("{} : {} \n".format(nonce,proof.to_bytes(32,"big").hex()) )
         return proof < target 
     
     def get_valid_nonce(self,target):
@@ -233,15 +209,6 @@ class Block:
             else:
                 print("shit-man")
                 break
-        # if flag:
-        #     print("required nonce: {}".format(self.nonce))      
-
         return self    
              
-
-
-# block_header= "0060e92f3f18ee206e1350f1cabe4ff319851d4c3c64b8d2d90e030000000000000000005f73d58ab5be2407065a26a290750250c1ebebc46a280e6f2b1c5032b3397c2ab48c2a66ffff001f00000000"
-# target ="0000ffff00000000000000000000000000000000000000000000000000000000"
-
-# print(Block.check_pow(block_header,target))
 
