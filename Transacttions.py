@@ -443,7 +443,7 @@ class Tx:
         witness_commitment = Tx.get_witness_commitment(tx_files)
         amount_2 = 0
         script_pubkey_2 = "6a24aa21a9ed" + witness_commitment 
-
+                          
 
         witness_reserved_value = "0000000000000000000000000000000000000000000000000000000000000000"
        
@@ -494,7 +494,13 @@ class Tx:
 
     @classmethod
     def get_witness_commitment(cls, tx_files):
-        wit_hashes = []
+
+        # Note -> for calculating witness_root -> we also require witness_txid of coinbase tx -> which is set to all zeroes
+        # As  witness_commitment will be inside the tx -> so this value is used in order to prvent circular reference
+
+        # wit_hashes will contain hashes in bytes
+        coinbase_wtxid= "0000000000000000000000000000000000000000000000000000000000000000"
+        wit_hashes = [bytes.fromhex(coinbase_wtxid)]
 
         for tx in tx_files:
             wit_hashes.append(hash256(Tx.serialize(tx)))
@@ -637,6 +643,4 @@ def categorize_sequence(sequence):
 
 
             return result
-        
-
-        
+    
