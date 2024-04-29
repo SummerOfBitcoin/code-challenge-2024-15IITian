@@ -3,7 +3,7 @@
 
 
 import json,hashlib,os
-from RIPEMD160 import ripemd160
+from Crypto.Hash import RIPEMD160
 
 
 ## This function will return  all the the transactions
@@ -168,11 +168,6 @@ def merkle_root(hashes):
 
 
 def HASH160(s):
-    return ripemd160(s)
+    hash_object = RIPEMD160.new(data=s)
+    return hash_object.digest()
 
-
-
-
-    
-   
-  

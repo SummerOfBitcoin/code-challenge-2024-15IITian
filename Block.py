@@ -66,6 +66,7 @@ class Block:
         fee_collected = 0
         tx_included= []
 
+        # we should also account for weight of coinbase tx
         for tx in tx_files:
             if (BLOCK_SIZE_FOR_TX -weight_stored)> tx["weights"]:
                   tx_count+= 1
@@ -112,8 +113,6 @@ class Block:
       
       # get the data related to tx mined in our block
       (tx_count,tx_included,fees_collected,weight_stored)=Block.get_mined_tx_data(tx_files)
-
-      
       #-------------------------------------------------------------------------------------------
       
       # create coinbase tx and get serliased form     
@@ -207,5 +206,3 @@ class Block:
                 print("shit-man")
                 break
         return self    
-             
-
