@@ -304,7 +304,6 @@ class Tx:
             if not Tx.verify_input(file,i):
                 return False
             
-            # verify the signatures provided.
         return True
         
 
@@ -539,7 +538,7 @@ class Tx:
             if unlock_flag:
                 tx_unlocked.append(file)    
 
-        return (tx_unlocked,tx_locked,zeroes)  
+        return tx_unlocked  
              
             
 

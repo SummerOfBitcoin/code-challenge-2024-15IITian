@@ -275,7 +275,7 @@ OP_CODE_NAMES = {
 
 
 
-# this function will give the funciton object from the string 
+# this function will give the function object from the string 
 def get_function_by_name(func_name):
     # Check if the function exists in the global namespace
     if func_name in globals() and callable(globals()[func_name]):
@@ -284,7 +284,7 @@ def get_function_by_name(func_name):
         return None
 
 
-all_opcodes_used : {  'OP_ELSE',   'OP_ENDIF'}
+# all_opcodes_used : {  'OP_ELSE',   'OP_ENDIF'}
 
 
 
